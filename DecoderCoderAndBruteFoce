@@ -1,0 +1,181 @@
+package gigasipher;
+
+import java.io.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Scanner;
+
+public class StreamChainExample_3 {
+    private static final List<Character> ALPHABET = Arrays.asList(
+        'а', 'б', 'в', 'г', 'д', 'е', 'ё', 'ж', 'з', 'и', 'й', 'к', 'л', 'м', 'н', 'о', 'п', 'р', 'с', 'т', 'у', 'ф', 'х',
+            'ц', 'ч', 'ш', 'щ', 'ъ', 'ы', 'ь', 'э', 'ю', 'я', 'А', 'Б', 'В', 'Г', 'Д', 'Е', 'Ё', 'Ж', 'З', 'И', 'Й', 'К', 'Л', 'М', 'Н', 'О', 'П', 'Р', 'С', 'Т', 'У', 'Ф', 'Х', 'Ц',
+'Ч', 'Ш', 'Щ', 'Ъ', 'Ы', 'Ь', 'Э', 'Ю', 'Я', '.', ',', '«', '»', '"', '\'', ':', ';', '-', '!', '?', ' '
+    );
+    private static final int ALPHABET_SIZE = ALPHABET.size();
+
+    public static void main(String[] args) throws IOException {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Выберите режим работы:");
+        System.out.println("1. Шифрование");
+        System.out.println("2. Дешифровка");
+        System.out.print("Ваш выбор: ");
+        int choice = scanner.nextInt();
+        scanner.nextLine(); // Consume newline
+
+        switch (choice) {
+            case 1:
+                encryptMode(scanner);
+                break;
+            case 2:
+                decryptMode(scanner);
+                break;
+            default:
+                System.out.println("Неправильный выбор.");
+        }
+        scanner.close();
+    }
+
+    private static void encryptMode(Scanner scanner) throws IOException {
+        System.out.print("Введите путь к входному файлу: ");
+        String inputFilePath = scanner.nextLine();
+        System.out.print("Введите путь к выходному файлу: ");
+        String outputFilePath = scanner.nextLine();
+        System.out.print("Введите ключ шифрования (целое число): ");
+        int key = scanner.nextInt();
+        scanner.nextLine(); // Consume newline
+
+        processFiles(inputFilePath, outputFilePath, true, key);
+    }
+
+    private static void decryptMode(Scanner scanner) throws IOException {
+        System.out.print("Введите путь к зашифрованному файлу: ");
+        String inputFilePath = scanner.nextLine();
+        System.out.print("Введите путь к выходному файлу: ");
+        String outputFilePath = scanner.nextLine();
+        System.out.print("Введите ключ шифрования (целое число), либо введите слово \"auto\" для автоматического подбора ключа: ");
+        String keyInput = scanner.nextLine();
+
+        if (keyInput.equalsIgnoreCase("auto")) {
+            autoDecrypt(inputFilePath, outputFilePath);
+        } else {
+            try {
+                int key = Integer.parseInt(keyInput);
+                processFiles(inputFilePath, outputFilePath, false, key);
+            } catch (NumberFormatException e) {
+                System.out.println("Некорректный ввод ключа. Пожалуйста, введите целое число или \"auto\".");
+            }
+        }
+    }
+
+    private static void processFiles(String inputFilePath, String outputFilePath, boolean isEncrypt, int key) throws IOException {
+        try (BufferedReader reader = new BufferedReader(new FileReader(inputFilePath));
+             BufferedWriter writer = new BufferedWriter(new FileWriter(outputFilePath))) {
+
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String processedLine = isEncrypt ? encryptCaesar(line, key) : decryptCaesar(line, key);
+                writer.write(processedLine);
+                writer.newLine();
+            }
+
+            System.out.println("Обработанный файл сохранён в " + outputFilePath);
+        } catch (FileNotFoundException e) {
+            System.err.println("Файл не найден: " + inputFilePath);
+        }
+    }
+
+    public static String encryptCaesar(String text, int shift) {
+        return transform(text, shift);
+    }
+
+    public static String decryptCaesar(String text, int shift) {
+        return transform(text, -shift);
+    }
+
+    private static String transform(String text, int shift) {
+        StringBuilder result = new StringBuilder();
+        for (char symbol : text.toCharArray()) {
+            int originalIndex = ALPHABET.indexOf(symbol);
+            if (originalIndex != -1) {
+                int newIndex = (originalIndex + shift) % ALPHABET_SIZE;
+                if (newIndex < 0) {
+                    newIndex += ALPHABET_SIZE;
+                }
+                result.append(ALPHABET.get(newIndex));
+            } else {
+                result.append(symbol);
+            }
+        }
+        return result.toString();
+    }
+
+    private static void autoDecrypt(String inputFilePath, String outputFilePath) throws IOException {
+        try (BufferedReader reader = new BufferedReader(new FileReader(inputFilePath));
+             BufferedWriter writer = new BufferedWriter(new FileWriter(outputFilePath))) {
+
+            String firstLine = reader.readLine();
+            if (firstLine != null) {
+                String bestMatch = "";
+                int bestShift = 0;
+                int maxCommonWords = 0;
+
+                // Пример списка часто встречающихся слов (можно расширить и адаптировать)
+                List<String> commonWords = Arrays.asList("это", "что", "как", "я", "ты", "он", "она", "мы", "вы", "они",
+                        "не", "в", "на", "с", "со", "по", "и", "а", "но", "да", "то",
+                        "же", "все", "так", "его", "мой", "свой", "сам", "себя",
+                        "быть", "есть", "был", "была", "было", "были", "будет",
+                        "может", "могут", "хочет", "хотят", "сказал", "говорит",
+                        "делать", "сделать", "идти", "прийти", "видеть", "смотреть",
+                        "знать", "понимать", "думать", "считать", "жить", "любить",
+                        "большой", "маленький", "хороший", "плохой", "новый", "старый",
+                        "один", "два", "три", "много", "мало", "сегодня", "завтра",
+                        "здесь", "там", "куда", "когда", "почему", "зачем", "очень",
+                        "уже", "еще", "только", "лишь", "даже", "нет", "ни", "или",
+                        "между", "через", "над", "под", "около", "вокруг", "для", "из",
+                        "к", "от", "до", "после", "перед", "против", "благодаря",
+                        "несмотря", "чтобы", "если", "когда", "пока", "как", "будто",
+                        "потому", "также", "кроме", "однако", "зато", "поэтому");
+
+                for (int shift = 1; shift < ALPHABET_SIZE; shift++) {
+                    String decryptedLine = decryptCaesar(firstLine, shift);
+                    int commonWordCount = 0;
+                    for (String word : decryptedLine.split("\\s+")) {
+                        if (commonWords.contains(word.toLowerCase())) {
+                            commonWordCount++;
+                        }
+                    }
+
+                    if (commonWordCount > maxCommonWords) {
+                        maxCommonWords = commonWordCount;
+                        bestMatch = decryptedLine;
+                        bestShift = shift;
+                    }
+                }
+
+                System.out.println("Автоматическое определение ключа: " + bestShift);
+                System.out.println("Предполагаемый расшифрованный текст (первая строка): " + bestMatch);
+
+                // Перезаписываем файл с предполагаемым ключом
+                try (BufferedReader reread = new BufferedReader(new FileReader(inputFilePath));
+                     BufferedWriter rewrite = new BufferedWriter(new FileWriter(outputFilePath))) {
+                    String line;
+                    while ((line = reread.readLine()) != null) {
+                        writer.write(decryptCaesar(line, bestShift));
+                        writer.newLine();
+                    }
+                    System.out.println("Файл дешифрован с предполагаемым ключом " + bestShift + " и сохранён в " + outputFilePath);
+                }
+
+            } else {
+                System.out.println("Входной файл пуст.");
+            }
+
+        } catch (FileNotFoundException e) {
+            System.err.println("Файл не найден: " + inputFilePath);
+        }
+    }
+
+    
+}
