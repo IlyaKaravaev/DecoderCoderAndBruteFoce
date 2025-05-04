@@ -1,4 +1,4 @@
-# DecoderCoderAndBruteFoce
+# DecoderCoderAndBruteForce
 Моя первая программа шифра Цезаря
 В начале я хотел повторить проект описанный  в конце лекции "Задание на итоговый проект модуля 1"
 ссылка  https://youtu.be/bj5quTB2Cnw
