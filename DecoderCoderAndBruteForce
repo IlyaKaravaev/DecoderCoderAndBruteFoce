@@ -1,17 +1,15 @@
-package gigasipher;
-
 import java.io.*;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Scanner;
 
-public class StreamChainExample_3 {
+
+public class CoderDecoderAndBruteForce {
+
     private static final List<Character> ALPHABET = Arrays.asList(
-        'а', 'б', 'в', 'г', 'д', 'е', 'ё', 'ж', 'з', 'и', 'й', 'к', 'л', 'м', 'н', 'о', 'п', 'р', 'с', 'т', 'у', 'ф', 'х',
+            'а', 'б', 'в', 'г', 'д', 'е', 'ё', 'ж', 'з', 'и', 'й', 'к', 'л', 'м', 'н', 'о', 'п', 'р', 'с', 'т', 'у', 'ф', 'х',
             'ц', 'ч', 'ш', 'щ', 'ъ', 'ы', 'ь', 'э', 'ю', 'я', 'А', 'Б', 'В', 'Г', 'Д', 'Е', 'Ё', 'Ж', 'З', 'И', 'Й', 'К', 'Л', 'М', 'Н', 'О', 'П', 'Р', 'С', 'Т', 'У', 'Ф', 'Х', 'Ц',
-'Ч', 'Ш', 'Щ', 'Ъ', 'Ы', 'Ь', 'Э', 'Ю', 'Я', '.', ',', '«', '»', '"', '\'', ':', ';', '-', '!', '?', ' '
+            'Ч', 'Ш', 'Щ', 'Ъ', 'Ы', 'Ь', 'Э', 'Ю', 'Я', '.', ',', '«', '»', '"', '\'', ':', ';', '-', '!', '?', ' '
     );
     private static final int ALPHABET_SIZE = ALPHABET.size();
 
@@ -121,8 +119,9 @@ public class StreamChainExample_3 {
                 int bestShift = 0;
                 int maxCommonWords = 0;
 
-                // Пример списка часто встречающихся слов (можно расширить и адаптировать)
-                List<String> commonWords = Arrays.asList("это", "что", "как", "я", "ты", "он", "она", "мы", "вы", "они",
+                // Расширенный список часто встречающихся слов на русском языке
+                List<String> commonWords = Arrays.asList(
+                        "это", "что", "как", "я", "ты", "он", "она", "мы", "вы", "они",
                         "не", "в", "на", "с", "со", "по", "и", "а", "но", "да", "то",
                         "же", "все", "так", "его", "мой", "свой", "сам", "себя",
                         "быть", "есть", "был", "была", "было", "были", "будет",
@@ -136,7 +135,8 @@ public class StreamChainExample_3 {
                         "между", "через", "над", "под", "около", "вокруг", "для", "из",
                         "к", "от", "до", "после", "перед", "против", "благодаря",
                         "несмотря", "чтобы", "если", "когда", "пока", "как", "будто",
-                        "потому", "также", "кроме", "однако", "зато", "поэтому");
+                        "потому", "также", "кроме", "однако", "зато", "поэтому"
+                );
 
                 for (int shift = 1; shift < ALPHABET_SIZE; shift++) {
                     String decryptedLine = decryptCaesar(firstLine, shift);
@@ -175,7 +175,6 @@ public class StreamChainExample_3 {
         } catch (FileNotFoundException e) {
             System.err.println("Файл не найден: " + inputFilePath);
         }
-    }
+    }   
 
-    
 }
